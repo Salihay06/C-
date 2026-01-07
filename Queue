@@ -1,0 +1,135 @@
+/******************************************************************************
+                          A sample demonstration of 
+                         how to implement an int Queue in C++
+*******************************************************************************/
+#include <iostream>       // cin, cout fonksiyonları için
+#include <string>         // string işlemleri için
+ 
+using namespace std; // std:: yazmamak için
+
+const int MAX_SIZE = 10; // Kuyruğun maksimum kapasitesi
+
+class Queue{
+private:
+    int arr[MAX_SIZE]; // Verileri tutan kutu
+    int front;         // Kuyruğun başını gösteren imleç
+    int rear;          // Kuyruğun sonunu gösteren imleç
+    int size;          // (Bu kodda pek kullanılmamış ama boyut için)
+
+public:
+    // Kurucu Fonksiyon (Constructor)
+    Queue() {
+        front = -1; // Başlangıçta kuyruk boş
+        rear = -1;
+        size = 0;
+    } 
+
+    // Kuyruk Boş mu?
+    bool empty() {
+        // Hem baş hem son -1 ise kimse yok demektir
+        if(front == -1 && rear == -1) 
+            return true;
+        return false;
+    }
+
+    // Kuyruk Dolu mu?
+    bool full() {   
+        // Eğer 'rear' dizinin son kutusuna geldiyse dolmuş kabul ediyoruz
+        if (rear == MAX_SIZE-1)
+            return true;
+        return false;
+    }
+
+    // ENQUEUE: Sıraya Eleman Ekleme
+    void enqueue (int value) {
+        if (full())   // Önce yer var mı diye bak
+            cout << "Queue is full \n";
+        else {
+            // Eğer kuyruk tamamen boşsa, 'front'u da 0 yapmalıyız ki ilk elemanı göstersin
+            if( front == -1) 
+                front = 0;
+            
+            rear++; // Sonuncuyu bir sağa kaydır
+            arr[rear] = value; // Yeni geleni oraya oturt
+            size++; // (Opsiyonel sayaç)
+            cout << "Inserting " << value << endl;
+        }
+    }
+
+    // DEQUEUE: Sıradan Eleman Çıkarma
+    void dequeue() {
+        if(empty()) // Kimse yoksa kimi çıkaracağız?
+            cout << "Queue is empty \n";
+        else {
+            cout << "Deleting " << arr[front] << endl;
+            front++; // Sıra bir arkadakine geçti (Öndeki gitti)
+            
+            // Eğer sıranın başı, sonunu geçtiyse kuyruk tamamen boşalmış demektir.
+            // Reset atıyoruz.
+            if(front > rear) {
+                front = -1;
+                rear = -1;
+            }
+        }
+    }
+
+    // Sıranın en önündeki kim? (Silmeden bak)
+    int getFront(){
+        if(empty()){
+            cout << "Queue is empty\n";
+            return -1;
+        }
+        else
+            return arr[front];
+    }
+    
+    // Sıranın en sonundaki kim?
+    int getRear(){
+        if(empty()){
+            cout << "Queue is empty\n";
+            return -1;
+        }
+        else
+            return arr[rear];
+     
+    }
+    
+    int getSize(){
+        return size;
+    }
+    
+    // Kuyruğu Ekrana Yazdır
+    void displayQueue(){
+        if(empty())
+            cout << "Queue is empty\n";
+        else{
+            // Front'tan Rear'a kadar herkesi yazdır
+            for( int i=front ; i<= rear ; i++)
+                cout << arr[i] << " ";
+            cout << "\n";
+        }
+    }
+    
+};
+
+
+// Test Alanı (Main)
+int main()
+{
+    Queue q1;// Birinci kuyruğu oluştur
+    q1.enqueue(1); // Sıraya 1 girsin
+    q1.enqueue(3); // 3 girsin
+    q1.enqueue(5); // ...
+    q1.enqueue(7);
+    q1.enqueue(13);
+ 
+    cout << "The first queue q1 is : ";
+    q1.displayQueue(); 
+    
+    cout << "The item at front of the queue is " << q1.getFront() << endl;
+    cout << "The item at rear of the queue is " << q1.getRear() << endl;
+   
+    Queue q2; // İkinci bir kuyruk oluştur
+    q2.enqueue(2); 
+    return 0;
+}
