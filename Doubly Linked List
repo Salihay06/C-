@@ -1,0 +1,130 @@
+#include <iostream>
+
+using namespace std;
+
+// Düğüm (Node) Sınıfı
+class Node {
+public:
+    int data;
+    Node *next; // Sonraki
+    Node *prev; // ÖNCEKİ (Yeni gelen özellik)
+
+    Node(int data) {
+        this->data = data;
+        this->next = nullptr;
+        this->prev = nullptr; // Başlangıçta arkası boş
+    }
+};
+
+class DoublyLinkedList {
+private:
+    Node *head; // Listenin başı
+    Node *tail; // Listenin SONU (Bu sayede sona ekleme çok hızlı olacak)
+
+public:
+    DoublyLinkedList() {
+        head = nullptr;
+        tail = nullptr;
+    }
+
+    // 1. BAŞA EKLEME (Add Front)
+    void insertAtBeginning(int data) {
+        Node *newNode = new Node(data);
+
+        if (head == nullptr) { // Liste boşsa
+            head = newNode;
+            tail = newNode; // Tek eleman hem baştır hem sondur
+        } else {
+            newNode->next = head; // Yeni'nin ilerisi eski başı göstersin
+            head->prev = newNode; // Eski başın gerisi YENİ'yi göstersin (KRİTİK ADIM)
+            head = newNode;       // Head artık yeni düğümdür
+        }
+    }
+
+    // 2. SONA EKLEME (Add Back) - O(1) Hızında!
+    void insertAtEnd(int data) {
+        Node *newNode = new Node(data);
+
+        if (tail == nullptr) { // Liste boşsa
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail->next = newNode; // Kuyruğun sonrasına ekle
+            newNode->prev = tail; // Yeninin öncesi eski kuyruğu göstersin
+            tail = newNode;       // Tail artık yeni düğümdür
+        }
+    }
+
+    // 3. BELİRLİ BİR DÜĞÜMÜ SİLME (Değer ile)
+    void deleteNode(int key) {
+        Node *temp = head;
+
+        // Silinecek elemanı bulana kadar gez
+        while (temp != nullptr && temp->data != key) {
+            temp = temp->next;
+        }
+
+        if (temp == nullptr) return; // Bulunamadı
+
+        // Eğer silinen baş ise (Head)
+        if (temp == head) {
+            head = temp->next;
+        }
+        // Eğer silinen son ise (Tail)
+        if (temp == tail) {
+            tail = temp->prev;
+        }
+        
+        // Bağlantıları koparma ve bağlama
+        if (temp->next != nullptr) {
+            temp->next->prev = temp->prev; // Sonrakinin 'gerisi', benim 'gerimi' göstersin
+        }
+        if (temp->prev != nullptr) {
+            temp->prev->next = temp->next; // Öncekinin 'ilerisi', benim 'ilerimi' göstersin
+        }
+
+        delete temp; // Hafızadan sil
+    }
+
+    // İLERİ YAZDIRMA
+    void printForward() {
+        Node *temp = head;
+        cout << "Bastan Sona: ";
+        while (temp != nullptr) {
+            cout << temp->data << " -> ";
+            temp = temp->next;
+        }
+        cout << "NULL" << endl;
+    }
+
+    // GERİ YAZDIRMA (Doubly Linked List'in şovu buradadır)
+    void printBackward() {
+        Node *temp = tail; // Kuyruktan başla
+        cout << "Sondan Basa: ";
+        while (temp != nullptr) { // Geri geri git
+            cout << temp->data << " -> ";
+            temp = temp->prev; // PREV kullanarak geri gidiyoruz
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+int main() {
+    DoublyLinkedList dll;
+
+    dll.insertAtBeginning(10);
+    dll.insertAtBeginning(20); // Liste: 20 <-> 10
+    
+    dll.insertAtEnd(30);       // Liste: 20 <-> 10 <-> 30
+    dll.insertAtEnd(40);       // Liste: 20 <-> 10 <-> 30 <-> 40
+
+    dll.printForward();  // Çıktı: 20 -> 10 -> 30 -> 40 -> NULL
+    dll.printBackward(); // Çıktı: 40 -> 30 -> 10 -> 20 -> NULL
+
+    cout << "10 siliniyor..." << endl;
+    dll.deleteNode(10);  // Aradan silme testi
+
+    dll.printForward();  // Çıktı: 20 -> 30 -> 40 -> NULL
+
+    return 0;
+}
