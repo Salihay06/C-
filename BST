@@ -1,0 +1,157 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    
+    Node(int deger) {
+        data = deger;
+        left = right = nullptr;
+    }
+};
+
+class BST {
+public:
+    Node* root;
+
+    BST() {
+        root = nullptr;
+    }
+
+    // --- EKLEME (INSERT) ---
+    // Yardımcı fonksiyon (Recursive)
+    Node* insertRecursive(Node* node, int deger) {
+        // 1. Ağaç boşsa veya yaprağa ulaştıysak yeni düğümü oluştur
+        if (node == nullptr) {
+            return new Node(deger);
+        }
+
+        // 2. Kurala göre yönlen
+        if (deger < node->data) {
+            node->left = insertRecursive(node->left, deger);
+        } 
+        else if (deger > node->data) {
+            node->right = insertRecursive(node->right, deger);
+        }
+        // Eşitse ekleme yapmıyoruz (Genelde BST'de duplicate olmaz)
+
+        return node;
+    }
+
+    // Kullanıcının çağırdığı fonksiyon
+    void insert(int deger) {
+        root = insertRecursive(root, deger);
+    }
+
+    // --- ARAMA (SEARCH) ---
+    bool search(int aranan) {
+        Node* temp = root;
+        while (temp != nullptr) {
+            if (aranan == temp->data) 
+                return true; // Bulundu
+            else if (aranan < temp->data)
+                temp = temp->left; // Küçüklere git
+            else
+                temp = temp->right; // Büyüklere git
+        }
+        return false; // Bulunamadı
+    }
+
+    // --- INORDER TRAVERSAL (SIRALI YAZDIRMA) ---
+    void inorder(Node* node) {
+        if (node == nullptr) return;
+        inorder(node->left);       // Sol
+        cout << node->data << " "; // Kök
+        inorder(node->right);      // Sağ
+    }
+
+    // --- SİLME (DELETE) - ZOR KISIM ---
+    // En küçük değeri bulan yardımcı fonksiyon
+    Node* findMin(Node* node) {
+        while (node->left != nullptr) node = node->left;
+        return node;
+    }
+
+    Node* deleteNode(Node* node, int silinecek) {
+        if (node == nullptr) return node;
+
+        // 1. Silinecek düğümü bul
+        if (silinecek < node->data) {
+            node->left = deleteNode(node->left, silinecek);
+        } 
+        else if (silinecek > node->data) {
+            node->right = deleteNode(node->right, silinecek);
+        } 
+        else {
+            // DÜĞÜM BULUNDU! Şimdi silme işlemi:
+
+            // Durum 1: Çocuğu yok (Yaprak) veya Tek Çocuk
+            if (node->left == nullptr) {
+                Node* temp = node->right;
+                delete node;
+                return temp;
+            } 
+            else if (node->right == nullptr) {
+                Node* temp = node->left;
+                delete node;
+                return temp;
+            }
+
+            // Durum 2: İki çocuğu var
+            // Sağ tarafın en küçüğünü (Successor) bul
+            Node* temp = findMin(node->right);
+
+            // O değeri buraya kopyala
+            node->data = temp->data;
+
+            // Şimdi o kopyaladığımız düğümü eski yerinden sil
+            node->right = deleteNode(node->right, temp->data);
+        }
+        return node;
+    }
+
+    void remove(int deger) {
+        root = deleteNode(root, deger);
+    }
+};
+
+int main() {
+    BST agac;
+    
+    // Slayttaki örneğe benzer eklemeler yapalım
+    agac.insert(50);
+    agac.insert(30);
+    agac.insert(20);
+    agac.insert(40);
+    agac.insert(70);
+    agac.insert(60);
+    agac.insert(80);
+
+    /* Oluşan Ağaç:
+            50
+           /  \
+         30    70
+        /  \  /  \
+       20  40 60 80
+    */
+
+    cout << "Inorder (Sirali) Yazdirma: ";
+    agac.inorder(agac.root); 
+    // Çıktı: 20 30 40 50 60 70 80 (Otomatik sıralandı!)
+    cout << endl;
+
+    cout << "70 araniyor: " << (agac.search(70) ? "Bulundu" : "Yok") << endl;
+    cout << "99 araniyor: " << (agac.search(99) ? "Bulundu" : "Yok") << endl;
+
+    cout << "\n20 siliniyor (Yaprak)...\n";
+    agac.remove(20);
+    agac.inorder(agac.root); cout << endl;
+
+    cout << "\n30 siliniyor (Iki cocuklu)...\n";
+    agac.remove(30); // Yerine 40 geçecek
+    agac.inorder(agac.root); cout << endl;
+
+    return 0;
+}
