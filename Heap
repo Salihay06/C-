@@ -1,0 +1,110 @@
+#include <iostream>
+#include <vector>
+#include <algorithm> // swap fonksiyonu için
+
+using namespace std;
+
+// Max Heap Sınıfı
+class MaxHeap {
+private:
+    // Dinamik dizi (vector) kullanıyoruz ama mantık dizi mantığı
+    vector<int> heap;
+
+public:
+    // Kurucu: 0. indeksi doldur (Kullanılmayacak)
+    MaxHeap() {
+        heap.push_back(-1); // Dummy value
+    }
+
+    // --- YARDIMCI FONKSİYONLAR ---
+    int parent(int i) { return i / 2; }
+    int leftChild(int i) { return 2 * i; }
+    int rightChild(int i) { return 2 * i + 1; }
+
+    // --- EKLEME (INSERT) ---
+    void insert(int key) {
+        // 1. En sona ekle
+        heap.push_back(key);
+        
+        // 2. Yukarı doğru düzenle (Heapify Up)
+        int index = heap.size() - 1;
+        
+        // Kök olmadığı sürece ve babasından büyük olduğu sürece
+        while (index > 1 && heap[index] > heap[parent(index)]) {
+            swap(heap[index], heap[parent(index)]);
+            index = parent(index); // Bir üst kata çık
+        }
+    }
+
+    // --- EN BÜYÜĞÜ SİLME (EXTRACT MAX) ---
+    int extractMax() {
+        if (heap.size() <= 1) return -1; // Hata
+
+        // 1. Kökü al (En büyük)
+        int maxVal = heap[1];
+
+        // 2. Son elemanı köke taşı
+        heap[1] = heap.back();
+        heap.pop_back();
+
+        // 3. Aşağı doğru düzenle (Heapify Down)
+        if (heap.size() > 1) { // Hala eleman varsa
+            heapify(1);
+        }
+
+        return maxVal;
+    }
+
+    // --- HEAPIFY (Aşağı Doğru Düzenleme) ---
+    void heapify(int i) {
+        int largest = i;
+        int left = leftChild(i);
+        int right = rightChild(i);
+        int n = heap.size() - 1; // Geçerli son indeks
+
+        // Sol çocuk var mı ve benden büyük mü?
+        if (left <= n && heap[left] > heap[largest])
+            largest = left;
+
+        // Sağ çocuk var mı ve şu anki en büyükten daha mı büyük?
+        if (right <= n && heap[right] > heap[largest])
+            largest = right;
+
+        // Eğer en büyük ben değilsem, çocuğumla yer değiştir
+        if (largest != i) {
+            swap(heap[i], heap[largest]);
+            heapify(largest); // Değiştiği yerden aşağı kontrole devam et
+        }
+    }
+
+    // --- YAZDIRMA ---
+    void printHeap() {
+        // 1'den başlayarak yazdırıyoruz
+        for (size_t i = 1; i < heap.size(); i++) {
+            cout << heap[i] << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    MaxHeap pq; // Priority Queue gibi davranır
+
+    cout << "Ekleniyor: 10, 20, 15, 30, 40" << endl;
+    pq.insert(10);
+    pq.insert(20);
+    pq.insert(15);
+    pq.insert(30);
+    pq.insert(40); // 40 en tepeye çıkmalı
+
+    cout << "Heap Dizisi: ";
+    pq.printHeap(); 
+    // Beklenen (yaklaşık): 40 30 15 10 20 (Sıra değişebilir ama 40 başta olmalı)
+
+    cout << "En buyuk (Priority) cikartiliyor: " << pq.extractMax() << endl; // 40 çıkar
+    
+    cout << "Yeni Heap: ";
+    pq.printHeap(); // 30 başa geçmeli
+
+    return 0;
+}
